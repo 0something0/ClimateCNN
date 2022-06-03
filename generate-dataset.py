@@ -31,18 +31,6 @@ def readfile(filename: str, min: int, max: int):
     arr = (arr - min)/max
     return arr
 
-#get resulting shape of matrix if splitting into target_shape within some axis
-# origin_shape - the shape of the original ndarray
-# target_shape - the desired shape of ndarray in a limited set of dimensions
-#                  should be a shorter tuple than origin_shape
-# returns a tuple of the resulting shape
-def calculate_shape(origin_shape: tuple, target_shape: tuple) -> tuple:
-    assert len(origin_shape) >= len(target_shape)
-
-    return target_shape + origin_shape[len(target_shape):]
-
-
-
 #split given 2D matrix into chunks of size chunk_size
 #and remove chunks with all zeros (based on first given matrix)
 # chunk_size - integer, length and width of each segment of the 2D matrix
@@ -50,13 +38,14 @@ def calculate_shape(origin_shape: tuple, target_shape: tuple) -> tuple:
 # returns a list of 3D ndarrays of shape (n, chunk_size, chunk_size)
 def split_into_chunks(chunk_size: int, input_arrays: list) -> list:
 
+    #prepare list of resulting chunks - each ndarray has n of 2D chunks, and extra dimensions for potential subpixels
     input_chunks = [np.zeros((1, chunk_size, chunk_size) + arr.shape[2:], dtype=float32) for arr in input_arrays]
 
     #reduced sample size for test purposes, should be len(input_arrays['temp']) and len(input_arrays['temp'][i]
     row_start = int(len(input_arrays[0]) / 2)
     col_start = int(len(input_arrays[0][1]) / 2 + 512)
 
-    for row in range(row_start, + 128, chunk_size):
+    for row in range(row_start, row_start + 128, chunk_size):
         for col in range(col_start, col_start + 128, chunk_size):
 
             #check if temp chunk is empty, go to next iteration
