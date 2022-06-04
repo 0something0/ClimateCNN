@@ -114,7 +114,7 @@ def build_model():
     x = layers.concatenate([input_temp, input_rain, input_elev])
 
     # Shrink output into 6 dimensions (rgb)(xy)
-    output_color = layers.Dense(CHUNK_SIZE**2 * 3, activation='relu', name="color")(x)
+    output_color = layers.Dense(CHUNK_SIZE**2 * 3, activation='sigmoid', name="color")(x)
 
     # Instantiate an end-to-end model predicting both priority and department
     model = keras.Model(
