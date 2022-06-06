@@ -11,7 +11,6 @@ from numpy import NaN, float32, ndarray
 
 import keras
 from keras import layers
-from keras.layers import Input
 
 CHUNK_SIZE = 16
 MAP_NAMES = ['temp', 'rain', 'elev']
@@ -106,15 +105,15 @@ def flatten_input(chunks: ndarray) -> ndarray:
 
 #set up convolutional neural network model
 def build_model():
-    input_temp = Input(shape=(CHUNK_SIZE**2,), name="temp")
-    input_rain = Input(shape=(CHUNK_SIZE**2,), name="rain")
-    input_elev = Input(shape=(CHUNK_SIZE**2,), name="elev")
+    input_temp = layers.Input(shape=(1, CHUNK_SIZE**2, ), name="temp")
+    input_elev = layers.Input(shape=(1, CHUNK_SIZE**2, ),name="elev")
+    input_rain = layers.Input(shape=(1, CHUNK_SIZE**2, ),name="rain")
 
     # Merge all available features into a single large vector via concatenation
-    x = layers.concatenate([input_temp, input_rain, input_elev])
-
+    concated = layers.concatenate([input_temp, input_rain, input_elev], axis=-1)
+    #print(f'concatnated shape  {concated.shape}')
     # Shrink output into 6 dimensions (rgb)(xy)
-    output_color = layers.Dense(CHUNK_SIZE**2 * 3, activation='sigmoid', name="color")(x)
+    output_color = layers.Dense(CHUNK_SIZE**2 * 3, input_shape=(None, CHUNK_SIZE**2 * 3) ,  activation='sigmoid', name="color")(concated)
 
     # Instantiate an end-to-end model predicting both priority and department
     model = keras.Model(
@@ -124,11 +123,17 @@ def build_model():
 
     #keras.utils.plot_model(model, "multi_input_and_output_model.png", show_shapes=True)
 
-    model.compile(optimizer=keras.optimizers.Adam(learning_rate=1e-3),
-                loss=keras.losses.BinaryCrossentropy(),
-                metrics=[keras.metrics.BinaryAccuracy(),
-                        keras.metrics.FalseNegatives()])
-    
+    # model.compile(optimizer=keras.optimizers.Adam(learning_rate=1e-3),
+    #             loss=keras.losses.BinaryCrossentropy(),
+    #             metrics=[keras.metrics.BinaryAccuracy(),
+    #                     keras.metrics.FalseNegatives()])
+
+    model.compile(
+        loss=keras.losses.MeanSquaredError(reduction="auto", name="mean_squared_error"),
+        optimizer=keras.optimizers.RMSprop(),
+    )
+
+
     return model
 
 
@@ -140,11 +145,38 @@ temp_chunks, rain_chunks, elev_chunks, colorchunks = \
 
 print(f'{len(temp_chunks)} {len(rain_chunks)} {len(elev_chunks)} {len(colorchunks)}')
 
+#add a third dimension to each variable
+temp_chunks, rain_chunks, elev_chunks, colorchunks = \
+    [np.expand_dims(chunk, axis=1) for chunk in [temp_chunks, rain_chunks, elev_chunks, colorchunks]]
+assert(temp_chunks.shape == (43, 1, 256))
+#assert(temp_chunks.shape == (43, 256))
+print(temp_chunks.shape)
+
 model = build_model()
 model.summary()
+
 model.fit(
     {"temp": temp_chunks, "rain": rain_chunks, "elev": elev_chunks},
     {"color": colorchunks},
-    epochs=2,
-    batch_size=32,
+    epochs=100,
+    #batch_size=43,
 )
+
+import matplotlib.pyplot as plt
+pred = model.predict({ key:np.expand_dims(value[1], 0) for key, value in zip(MAP_NAMES, [temp_chunks, rain_chunks, elev_chunks]) } )
+
+
+plt.imshow(temp_chunks[1].reshape(CHUNK_SIZE, CHUNK_SIZE))
+plt.show()
+
+plt.imshow(rain_chunks[1].reshape(CHUNK_SIZE, CHUNK_SIZE))
+plt.show()
+
+plt.imshow(elev_chunks[1].reshape(CHUNK_SIZE, CHUNK_SIZE))
+plt.show()
+
+plt.imshow(colorchunks[1].reshape(CHUNK_SIZE, CHUNK_SIZE, 3))
+plt.show()
+
+plt.imshow(pred.reshape(CHUNK_SIZE, CHUNK_SIZE, 3))
+plt.show()
