@@ -166,17 +166,28 @@ import matplotlib.pyplot as plt
 pred = model.predict({ key:np.expand_dims(value[1], 0) for key, value in zip(MAP_NAMES, [temp_chunks, rain_chunks, elev_chunks]) } )
 
 
-plt.imshow(temp_chunks[1].reshape(CHUNK_SIZE, CHUNK_SIZE))
-plt.show()
+import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import ImageGrid
 
-plt.imshow(rain_chunks[1].reshape(CHUNK_SIZE, CHUNK_SIZE))
-plt.show()
+#show 3x2 images in a grid
+#fig, axs = plt.subplots(3, 2, figsize=(10, 10))
+fig = plt.figure(figsize=(10., 10.))
+grid = ImageGrid(fig, 111,  # similar to subplot(111)
+                 nrows_ncols=(2, 3),  # creates 2x2 grid of axes
+                 axes_pad=0.5,  # pad between axes in inch.
+                 )
+    
 
-plt.imshow(elev_chunks[1].reshape(CHUNK_SIZE, CHUNK_SIZE))
-plt.show()
+for count, ax in enumerate(grid):
+    
+    if count >= 5:
+        break
+    chunk = [temp_chunks, rain_chunks, elev_chunks, colorchunks, [None, pred]][count][1]
+    if 256 in chunk.shape:
+        chunk = np.reshape(chunk, (16,16))
+    elif 768 in chunk.shape:
+        chunk = np.reshape(chunk, (16, 16, 3))
+    ax.imshow(chunk)
+    ax.set_title(f"{((MAP_NAMES + ['Colormap (Actual)', 'Colormap (Predicted)'])[count])}")
 
-plt.imshow(colorchunks[1].reshape(CHUNK_SIZE, CHUNK_SIZE, 3))
-plt.show()
-
-plt.imshow(pred.reshape(CHUNK_SIZE, CHUNK_SIZE, 3))
 plt.show()
