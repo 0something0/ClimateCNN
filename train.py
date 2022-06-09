@@ -60,7 +60,6 @@ def split_into_chunks(chunk_size: int, input_arrays: list) -> list:
     #should be pointed off the Southeastern United States
     #if using a 4320x2160 equirectengular map, centered at long/lat (0, 0)
 
-    #y-coord/latitude
     row_start = 690 
     #x-coord/longitude
     col_start = 1130
@@ -137,8 +136,29 @@ def build_model():
     return model
 
 
-input_arrays = {key: readfile(rf'{key}_map.tif', 0 , MAX_VALUES[key]) for key in MAP_NAMES}
-colorarray = readfile(r'colormap.png', 0 ,255)
+#input_arrays = {key: readfile(rf'{key}.tif', 0 , MAX_VALUES[key]) for key in MAP_NAMES}
+
+import os
+
+#return first .tif file in directory
+def get_first_tif(dirname: str) -> str:
+    for filename in os.listdir(dirname):
+        if filename.find('.tif') != -1:
+            return rf'{dirname}/{filename}'
+
+def get_first_png(dirname: str) -> str:
+    for filename in os.listdir(dirname):
+        if filename.find('.png') != -1:
+            return rf'{dirname}/{filename}'
+
+input_arrays = \
+{
+    'temp': readfile(get_first_tif(r'training_dataset/temperature'), 0 , MAX_VALUES['temp']),
+    'rain': readfile(get_first_tif(r'training_dataset/rainfall'), 0 , MAX_VALUES['rain']),
+    'elev': readfile(get_first_tif(r'training_dataset/elevation'), 0 , MAX_VALUES['elev']),
+}
+
+colorarray = readfile(get_first_png(r'training_dataset/color'), 0 , 255)
 
 temp_chunks, rain_chunks, elev_chunks, colorchunks = \
     [flatten_input(chunks) for chunks in split_into_chunks(CHUNK_SIZE, list(input_arrays.values()) + [colorarray])]
@@ -162,7 +182,6 @@ model.fit(
     #batch_size=43,
 )
 
-import matplotlib.pyplot as plt
 pred = model.predict({ key:np.expand_dims(value[1], 0) for key, value in zip(MAP_NAMES, [temp_chunks, rain_chunks, elev_chunks]) } )
 
 
@@ -176,7 +195,7 @@ grid = ImageGrid(fig, 111,  # similar to subplot(111)
                  nrows_ncols=(2, 3),  # creates 2x2 grid of axes
                  axes_pad=0.5,  # pad between axes in inch.
                  )
-    
+
 
 for count, ax in enumerate(grid):
     
