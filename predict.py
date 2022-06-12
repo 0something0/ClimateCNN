@@ -17,28 +17,16 @@ input_arrays = \
 temp_chunks, rain_chunks, elev_chunks = \
     [flatten_input(chunks) for chunks in split_into_chunks(CHUNK_SIZE, list(input_arrays.values()))]
 
-#add a third dimension to each variable, for training purposes
+#add a third dimension to each variable, reshaping each chunk from (CHUNK_SIZE**2,) to match (None, CHUNK_SIZE**2)
 temp_chunks, rain_chunks, elev_chunks = \
     [np.expand_dims(chunk, axis=1) for chunk in [temp_chunks, rain_chunks, elev_chunks]]
 
-temp_chunks, rain_chunks, elev_chunks = \
-    [np.expand_dims(chunk, axis=1) for chunk in [temp_chunks, rain_chunks, elev_chunks]]
+
 
 data_dict = zip(MAP_NAMES, [temp_chunks, rain_chunks, elev_chunks]) 
 for i in range(len(temp_chunks)):
 
-    #predicts the color of the chunk
-    #after adding another dimension
-    #(training data also got a blank dimension added to it)
-    # pred = model.predict({
-    #         key:value
-    #         for key, value
-    #         in data_dict
-    # })
-
     pred = model.predict({'temp': temp_chunks[i], 'rain': rain_chunks[i], 'elev': elev_chunks[i]})
-
-
     pred = np.resize(pred, (CHUNK_SIZE, CHUNK_SIZE, 3))
     #imagecodecs.imwrite(rf'prediction_dataset/prediction_{i}.png', pred)
 

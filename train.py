@@ -14,9 +14,9 @@ from preprocess import *
 
 #set up convolutional neural network model
 def build_model():
-    input_temp = layers.Input(shape=(1, CHUNK_SIZE**2, ), name="temp")
-    input_elev = layers.Input(shape=(1, CHUNK_SIZE**2, ),name="elev")
-    input_rain = layers.Input(shape=(1, CHUNK_SIZE**2, ),name="rain")
+    input_temp = layers.Input(shape=(CHUNK_SIZE**2, ), name="temp")
+    input_elev = layers.Input(shape=(CHUNK_SIZE**2, ),name="elev")
+    input_rain = layers.Input(shape=(CHUNK_SIZE**2, ),name="rain")
 
     # Merge all available features into a single large vector via concatenation
     concated = layers.concatenate([input_temp, input_rain, input_elev], axis=-1)
@@ -61,9 +61,6 @@ temp_chunks, rain_chunks, elev_chunks, colorchunks = \
 
 print(f'{len(temp_chunks)} {len(rain_chunks)} {len(elev_chunks)} {len(colorchunks)}')
 
-#add a third dimension to each variable, for training purposes
-temp_chunks, rain_chunks, elev_chunks, colorchunks = \
-    [np.expand_dims(chunk, axis=1) for chunk in [temp_chunks, rain_chunks, elev_chunks, colorchunks]]
 
 assert(temp_chunks.shape[1:] == (1, 256))
 print(temp_chunks.shape)
@@ -75,7 +72,6 @@ model.fit(
     {"temp": temp_chunks, "rain": rain_chunks, "elev": elev_chunks},
     {"color": colorchunks},
     epochs=100,
-    #batch_size=43,
 )
 
 #save model to model.keras
