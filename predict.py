@@ -12,13 +12,11 @@ input_arrays = \
 }
 
 temp_chunks, rain_chunks, elev_chunks = \
-    [flatten_input(chunks) for chunks in split_into_chunks(CHUNK_SIZE, list(input_arrays.values()))]
+    [process_nan_values(chunks) for chunks in split_into_chunks(CHUNK_SIZE, list(input_arrays.values()))]
 
 #add a third dimension to each variable, reshaping each chunk from (CHUNK_SIZE**2,) to match (None, CHUNK_SIZE**2)
 temp_chunks, rain_chunks, elev_chunks = \
     [np.expand_dims(chunk, axis=1) for chunk in [temp_chunks, rain_chunks, elev_chunks]]
-
-
 
 #predict color output for each chunk
 data_dict = zip(MAP_NAMES, [temp_chunks, rain_chunks, elev_chunks]) 

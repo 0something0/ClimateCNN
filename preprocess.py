@@ -77,8 +77,13 @@ def flatten_input(chunks: ndarray) -> ndarray:
     #flatten from (1, x, x, ...) to (1, x^2...)    
     chunks = chunks.reshape(chunks.shape[0], np.prod(chunks.shape[1:])) 
     
+    assert np.all(chunks >= 0)
+    assert np.all(chunks <= 1)
+    return chunks
+
     #replace NaN with mean values
-    #for count, chunk in enumerate(chunks):
+def process_nan_values(chunks: ndarray) -> ndarray:
+        
     for i in range(len(chunks)):
         chunk = chunks[i]   
         mean = np.nanmean(chunk)
