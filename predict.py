@@ -1,10 +1,7 @@
 import keras
 import numpy as np
 from preprocess import *
-from numpy import NaN, float32, ndarray
 from matplotlib import pyplot as plt
-
-#MAP_NAMES = ['temp', 'rain', 'elev']
 
 model = keras.models.load_model('model.keras')
 input_arrays = \
@@ -23,12 +20,11 @@ temp_chunks, rain_chunks, elev_chunks = \
 
 
 
+#predict color output for each chunk
 data_dict = zip(MAP_NAMES, [temp_chunks, rain_chunks, elev_chunks]) 
 for i in range(len(temp_chunks)):
 
     pred = model.predict({'temp': temp_chunks[i], 'rain': rain_chunks[i], 'elev': elev_chunks[i]})
     pred = np.resize(pred, (CHUNK_SIZE, CHUNK_SIZE, 3))
-    #imagecodecs.imwrite(rf'prediction_dataset/prediction_{i}.png', pred)
-
 
     plt.imsave(rf'prediction_dataset/color_output/prediction_{i}.png', pred)

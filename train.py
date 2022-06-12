@@ -5,9 +5,6 @@
 # Visual imagery from NASA Blue Marble
 
 import numpy as np
-
-from numpy import NaN, float32, ndarray
-
 import keras
 from keras import layers
 from preprocess import *
@@ -35,11 +32,7 @@ def build_model():
         optimizer=keras.optimizers.RMSprop(),
     )
 
-
     return model
-
-
-#input_arrays = {key: readfile(rf'{key}.tif', 0 , MAX_VALUES[key]) for key in MAP_NAMES}
 
 import os
 
@@ -59,20 +52,20 @@ colorarray = readfile(get_first_png(r'training_dataset/color'), 0 , 255)
 temp_chunks, rain_chunks, elev_chunks, colorchunks = \
     [flatten_input(chunks) for chunks in split_into_chunks(CHUNK_SIZE, list(input_arrays.values()) + [colorarray])]
 
-print(f'{len(temp_chunks)} {len(rain_chunks)} {len(elev_chunks)} {len(colorchunks)}')
 
 
-assert(temp_chunks.shape[1:] == (1, 256))
-print(temp_chunks.shape)
 
+
+
+
+
+#Model building and training
 model = build_model()
 model.summary()
-
 model.fit(
     {"temp": temp_chunks, "rain": rain_chunks, "elev": elev_chunks},
     {"color": colorchunks},
     epochs=100,
 )
 
-#save model to model.keras
 model.save(r'model.keras')
