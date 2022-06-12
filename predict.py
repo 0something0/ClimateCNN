@@ -44,31 +44,3 @@ for i in range(len(temp_chunks)):
 
 
     plt.imsave(rf'prediction_dataset/color_output/prediction_{i}.png', pred)
-
-"""
-import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import ImageGrid
-
-#show 3x2 images in a grid
-#fig, axs = plt.subplots(3, 2, figsize=(10, 10))
-fig = plt.figure(figsize=(10., 10.))
-grid = ImageGrid(fig, 111,  # similar to subplot(111)
-                 nrows_ncols=(2, 3),  # creates 2x2 grid of axes
-                 axes_pad=0.5,  # pad between axes in inch.
-                 )
-
-
-for count, ax in enumerate(grid):
-    
-    if count >= 5:
-        break
-    chunk = [temp_chunks, rain_chunks, elev_chunks, colorchunks, [None, pred]][count][1]
-    if 256 in chunk.shape:
-        chunk = np.reshape(chunk, (16,16))
-    elif 768 in chunk.shape:
-        chunk = np.reshape(chunk, (16, 16, 3))
-    ax.imshow(chunk)
-    ax.set_title(f"{((MAP_NAMES + ['Colormap (Actual)', 'Colormap (Predicted)'])[count])}")
-
-plt.show()
-"""

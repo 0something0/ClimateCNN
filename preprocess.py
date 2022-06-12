@@ -48,18 +48,8 @@ def split_into_chunks(chunk_size: int, input_arrays: list) -> list:
     # see: broadcasting
     input_chunks = [np.zeros((1, chunk_size, chunk_size) + arr.shape[2:], dtype=float32) for arr in input_arrays]
 
-    #reduced sample size for test purposes, should be len(input_arrays['temp']) and len(input_arrays['temp'][i]
-    #row_start = int(len(input_arrays[0]) / 2)
-    #col_start = int(len(input_arrays[0][1]) / 2 + 512)
-    
-    #should be pointed off the Southeastern United States
+    # (row, col) = (690, 1130) should be pointed off the Southeastern United States
     #if using a 4320x2160 equirectengular map, centered at long/lat (0, 0)
-
-    #y-coord/latitude>
-    #row_start = 690 
-    #x-coord/longitude
-    #col_start = 1130
-    
 
     #cauess issues with row = input_arrays[0]) / 2 + 192
     for row in range(0, len(input_arrays[0]), chunk_size):

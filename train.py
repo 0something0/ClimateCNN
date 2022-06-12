@@ -20,7 +20,7 @@ def build_model():
 
     # Merge all available features into a single large vector via concatenation
     concated = layers.concatenate([input_temp, input_rain, input_elev], axis=-1)
-    #print(f'concatnated shape  {concated.shape}')
+
     # Shrink output into 6 dimensions (rgb)(xy)
     output_color = layers.Dense(CHUNK_SIZE**2 * 3, input_shape=(None, CHUNK_SIZE**2 * 3) ,  activation='sigmoid', name="color")(concated)
 
@@ -29,13 +29,6 @@ def build_model():
         inputs=[input_temp, input_rain, input_elev],
         outputs=[output_color],
     )
-
-    #keras.utils.plot_model(model, "multi_input_and_output_model.png", show_shapes=True)
-
-    # model.compile(optimizer=keras.optimizers.Adam(learning_rate=1e-3),
-    #             loss=keras.losses.BinaryCrossentropy(),
-    #             metrics=[keras.metrics.BinaryAccuracy(),
-    #                     keras.metrics.FalseNegatives()])
 
     model.compile(
         loss=keras.losses.MeanSquaredError(reduction="auto", name="mean_squared_error"),
