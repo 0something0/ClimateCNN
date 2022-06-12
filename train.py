@@ -38,23 +38,10 @@ def build_model():
 
     return model
 
-import os
-
-#input_arrays is a dictionary that holds the pre-processed maps 
-# within input_arrays and colorarrays
-# the 2D arrays within should be normalized to 0-1, but NOT flattened
-input_arrays = \
-{
-    #todo - change MAP_NAMES constant, hardcoded values causing issues with ordering
-    'temp': readfile(get_first_tif(r'training_dataset/temperature'), 0 , MAX_VALUES['temp']),
-    'rain': readfile(get_first_tif(r'training_dataset/rainfall'), 0 , MAX_VALUES['rain']),
-    'elev': readfile(get_first_tif(r'training_dataset/elevation'), 0 , MAX_VALUES['elev']),
-}
-colorarray = readfile(get_first_png(r'training_dataset/color'), 0 , 255)
-
-#the map arrays should now be split into squares of size CHUNK_SIZE and flattened
-temp_chunks, rain_chunks, elev_chunks, colorchunks = \
-    [process_nan_values(chunks) for chunks in split_into_chunks(CHUNK_SIZE, list(input_arrays.values()) + [colorarray])]
+temp_chunks, rain_chunks, elev_chunks, colorchunks = [get_first_tif(file_path) for file_path in [r'training_dataset/temperature', r'training_dataset/rainfall', r'training_dataset/elevation']] + [get_first_png( r'training_dataset/color')]
+temp_chunks, rain_chunks, elev_chunks, colorchunks = read_multi_files([temp_chunks, rain_chunks, elev_chunks, colorchunks], [40, 3000, 7000, 255])
+temp_chunks, rain_chunks, elev_chunks, colorchunks = [chunks for chunks in split_into_chunks(CHUNK_SIZE, [temp_chunks, rain_chunks, elev_chunks, colorchunks])]
+temp_chunks, rain_chunks, elev_chunks, colorchunks = [process_nan_values(chunks) for chunks in [temp_chunks, rain_chunks, elev_chunks, colorchunks]]
 
 #Confirmation for final data input shape and size
 print(
